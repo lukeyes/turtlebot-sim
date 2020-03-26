@@ -29,9 +29,14 @@ public class MyGdxGame extends ApplicationAdapter {
 	static final float kStopThreshold = 2.0f;
 	static final float kWarningThreshold = 4.0f;
 
+	int maxReading;
+
 	long timeLastUpdate;
 
-	public MyGdxGame() {
+	public MyGdxGame(int pixelsPerCell) {
+
+		robotWidth = pixelsPerCell;
+		maxReading = Math.min(Constants.NUM_CELLS/2, 12);
 
 		int numReadings = 8;
 
@@ -41,7 +46,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		for(int i = 0; i < numReadings; i++) {
 			float currentDegree = i * degreesPerReading;
-			float currentReading = 12.0f;
+			float currentReading = maxReading;
 
 			sonarReadings.put(currentDegree, currentReading);
 		}
@@ -50,7 +55,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		int numLidarReadings = 360;
 		for(int i = 0; i < numLidarReadings; i++) {
-			lidarReadings.put((float) i, 12.0f);
+			lidarReadings.put((float) i, (float) maxReading);
 		}
 
 		timeLastUpdate = TimeUtils.millis();
@@ -62,9 +67,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		img = new Texture("badlogic.jpg");
 		shapeRenderer = new ShapeRenderer();
 
-		robotWidth = 32;
-		robotX = 12*robotWidth;
-		robotY = 12*robotWidth;
+		robotX = maxReading*robotWidth;
+		robotY = maxReading*robotWidth;
 	}
 
 	@Override
@@ -85,7 +89,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	private void randomizeSonar() {
 		for(Map.Entry<Float, Float> entry : sonarReadings.entrySet()) {
 
-			double reading = Math.random()*12.0;
+			double reading = Math.random()*maxReading;
 
 			entry.setValue((float) reading);
 		}
@@ -93,7 +97,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	private void randomizeLidar() {
 		for(Map.Entry<Float, Float> entry : lidarReadings.entrySet()) {
-			double reading = Math.random() * 12.0;
+			double reading = Math.random() * maxReading;
 			entry.setValue((float) reading);
 		}
 	}
@@ -101,6 +105,18 @@ public class MyGdxGame extends ApplicationAdapter {
 	private void draw() {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+
+
+		drawReadings();
+
+		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+		shapeRenderer.setColor(0,0,1,1);
+		shapeRenderer.circle(robotX, robotY, robotWidth/2,8);
+		shapeRenderer.end();
+	}
+
+	private void drawReadings() {
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
 		for(Map.Entry<Float, Float> entry : sonarReadings.entrySet()) {
@@ -119,13 +135,6 @@ public class MyGdxGame extends ApplicationAdapter {
 			drawReading(currentAngle, currentReading);
 		}
 
-		//shapeRenderer.rect(x, y, width, height);
-		//shapeRenderer.circle(x, y, radius);
-		shapeRenderer.end();
-
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-		shapeRenderer.setColor(0,0,1,1);
-		shapeRenderer.circle(robotX, robotY, robotWidth/2,8);
 		shapeRenderer.end();
 	}
 
